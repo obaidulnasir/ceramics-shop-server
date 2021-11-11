@@ -64,6 +64,20 @@ async function run() {
       const result = await products.findOne(query);
       res.send(result)
     });
+
+    //ADD an Order
+    app.post('/placeOrder', async(req, res)=>{
+      const newOrder = req.body;
+      const result = await purchase.insertOne(newOrder);
+      res.send(result);
+      console.log(result);
+    });
+    
+    // GET ALL Order 
+    app.get('/allOrders', async(req, res)=>{
+      const result = await purchase.find({}).toArray();
+      res.send(result);
+    })
     
   } finally {
     // await client.close();
