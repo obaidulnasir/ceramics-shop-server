@@ -55,7 +55,15 @@ async function run() {
     app.get("/allProducts", async (req, res)=>{
       const result = await products.find({}).toArray();
       res.send(result);
-    })
+    });
+    //Get single products data
+    app.get('/product/:id', async(req, res)=>{
+      const service = req.params.id;
+      console.log(service)
+      const query = {_id: ObjectId(service)};
+      const result = await products.findOne(query);
+      res.send(result)
+    });
     
   } finally {
     // await client.close();
