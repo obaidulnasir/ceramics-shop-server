@@ -1,29 +1,30 @@
-const express = require('express');
+const express = require("express");
 const app = express();
-const { MongoClient } = require('mongodb');
-var cors = require('cors');
-const ObjectId = require('mongodb').ObjectId;
+const { MongoClient } = require("mongodb");
+var cors = require("cors");
+const ObjectId = require("mongodb").ObjectId;
 const email = require("mongodb").email;
-require('dotenv').config();
+require("dotenv").config();
 const port = process.env.PORT || 5000;
-
 
 //middleware
 app.use(cors());
 app.use(express.json());
 
-
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.rmbaw.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
 
 console.log(uri);
 
-const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+const client = new MongoClient(uri, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
 
 async function run() {
   try {
     await client.connect();
-    console.log('database connect');
-    
+    console.log("database connect");
+
     //Ceramics database
     const ceramicsShop = client.db("ceramicsShop");
     //Products Collection
@@ -33,76 +34,104 @@ async function run() {
     //Purchase Collection
     const purchase = ceramicsShop.collection("purchase");
     //Review Collection
-    const review = ceramicsShop.collection("review")
-    app.post("/addProducts", async(req, res)=>{
-        console.log("add products hitted")
+    const review = ceramicsShop.collection("review");
+    app.post("/addProducts", async (req, res) => {
+      console.log("add products hitted");
     });
 
-    // add customer 
-    app.post("/addCustomer", async(req, res)=>{
-        console.log("add user hitted");
-        const newUser = req.body;
-        const result = await customer.insertOne(newUser);
-        res.send(result);
+    // add customer
+    app.post("/addCustomer", async (req, res) => {
+      console.log("add user hitted");
+      const newUser = req.body;
+      const result = await customer.insertOne(newUser);
+      res.send(result);
+    });
+    //is Admin
+    app.get("/customer/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const user = await customer.findOne(query);
+      let isAdmin = false;
+      if (user?.role === "admin") {
+        isAdmin = true;
+      }
+      res.json({ admin: isAdmin });
     });
     //Make Admin
-    app.put('/makeAdmin', async(req, res)=> {
+    app.put("/makeAdmin", async (req, res) => {
       const user = req.body;
-      const filter = {email: user.email};
-      const updateDoc= {$set:{role:"admin"}};
+      const filter = { email: user.email };
+      const updateDoc = { $set: { role: "admin" } };
       const result = await customer.updateOne(filter, updateDoc);
       res.json(result);
       console.log(user);
-    })
+    });
 
     //ADD Products
-    app.post("/addProduct", async(req, res)=>{
+    app.post("/addProduct", async (req, res) => {
       const newProduct = req.body;
       const result = await products.insertOne(newProduct);
       console.log(result);
       res.send(result);
     });
-    //ALL Products 
-    app.get("/allProducts", async (req, res)=>{
+    //ALL Products
+    app.get("/allProducts", async (req, res) => {
       const result = await products.find({}).toArray();
       res.send(result);
     });
+
     //Get single products data
-    app.get('/product/:id', async(req, res)=>{
+    app.get("/product/:id", async (req, res) => {
       const service = req.params.id;
-      console.log(service)
-      const query = {_id: ObjectId(service)};
+      console.log(service);
+      const query = { _id: ObjectId(service) };
       const result = await products.findOne(query);
-      res.send(result)
+      res.send(result);
     });
 
     //ADD an Order
-    app.post('/placeOrder', async(req, res)=>{
+    app.post("/placeOrder", async (req, res) => {
       const newOrder = req.body;
       const result = await purchase.insertOne(newOrder);
       res.send(result);
       console.log(result);
     });
-    
-    // GET ALL Order 
-    app.get('/allOrders', async(req, res)=>{
-      const result = await purchase.find({}).toArray();
+
+    //GET my Order
+    app.get("/myOrder/:email", async (req, res) => {
+      const myEmail = req.params.email;
+      console.log(myEmail);
+      const query = { email: myEmail };
+      const result = await purchase.find(query).toArray();
+      console.log(result);
       res.send(result);
     });
 
-    //ADD Review
-    app.post('/addReview', async(req, res)=>{
-      const newReview = req.body;
-     const result = await review.insertOne(newReview);
-     res.send(result);
-     console.log(result)
+    // GET ALL Order
+    app.get("/allOrders", async (req, res) => {
+      const result = await purchase.find({}).toArray();
+      res.send(result);
     });
-    //GET All Review
-    app.get('/allReview', async(req, res)=>{
-      const result = await review.find({}).toArray();
+    //DELETE Single Order
+    app.delete('/deleteOrder/:id', async (req, res)=>{
+      const deleteEvents = req.params.id;
+      const query = {_id: ObjectId(deleteEvents)};
+      const result = await purchase.deleteOne(query);
       res.send(result);
     })
-    
+
+    //ADD Review
+    app.post("/addReview", async (req, res) => {
+      const newReview = req.body;
+      const result = await review.insertOne(newReview);
+      res.send(result);
+      console.log(result);
+    });
+    //GET All Review
+    app.get("/allReview", async (req, res) => {
+      const result = await review.find({}).toArray();
+      res.send(result);
+    });
   } finally {
     // await client.close();
   }
@@ -110,11 +139,10 @@ async function run() {
 
 run().catch(console.dir);
 
-
-app.get('/', (req, res) => {
-  res.send('Hello World!')
-})
+app.get("/", (req, res) => {
+  res.send("Hello World!");
+});
 
 app.listen(port, () => {
-  console.log(`Example app listening at http://localhost:${port}`)
-})
+  console.log(`Example app listening at http://localhost:${port}`);
+});
