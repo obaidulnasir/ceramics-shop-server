@@ -32,10 +32,12 @@ async function run() {
     const customer = ceramicsShop.collection("customer");
     //Purchase Collection
     const purchase = ceramicsShop.collection("purchase");
-
+    //Review Collection
+    const review = ceramicsShop.collection("review")
     app.post("/addProducts", async(req, res)=>{
         console.log("add products hitted")
     });
+
     // add customer 
     app.post("/addCustomer", async(req, res)=>{
         console.log("add user hitted");
@@ -43,6 +45,15 @@ async function run() {
         const result = await customer.insertOne(newUser);
         res.send(result);
     });
+    //Make Admin
+    app.put('/makeAdmin', async(req, res)=> {
+      const user = req.body;
+      const filter = {email: user.email};
+      const updateDoc= {$set:{role:"admin"}};
+      const result = await customer.updateOne(filter, updateDoc);
+      res.json(result);
+      console.log(user);
+    })
 
     //ADD Products
     app.post("/addProduct", async(req, res)=>{
@@ -76,6 +87,19 @@ async function run() {
     // GET ALL Order 
     app.get('/allOrders', async(req, res)=>{
       const result = await purchase.find({}).toArray();
+      res.send(result);
+    });
+
+    //ADD Review
+    app.post('/addReview', async(req, res)=>{
+      const newReview = req.body;
+     const result = await review.insertOne(newReview);
+     res.send(result);
+     console.log(result)
+    });
+    //GET All Review
+    app.get('/allReview', async(req, res)=>{
+      const result = await review.find({}).toArray();
       res.send(result);
     })
     
