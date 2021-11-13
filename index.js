@@ -79,6 +79,13 @@ async function run() {
       const result = await products.find({}).toArray();
       res.send(result);
     });
+    //Delete Single Product
+    app.delete('/deleteProduct/:id', async (req, res)=>{
+      const deleteEvents = req.params.id;
+      const query = {_id: ObjectId(deleteEvents)};
+      const result = await products.deleteOne(query);
+      res.send(result);
+    })
 
     //Get single products data
     app.get("/product/:id", async (req, res) => {
@@ -112,6 +119,7 @@ async function run() {
       const result = await purchase.find({}).toArray();
       res.send(result);
     });
+
     //DELETE Single Order
     app.delete('/deleteOrder/:id', async (req, res)=>{
       const deleteEvents = req.params.id;
