@@ -13,7 +13,7 @@ app.use(express.json());
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.rmbaw.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
 
-console.log(uri);
+
 
 const client = new MongoClient(uri, {
   useNewUrlParser: true,
@@ -35,17 +35,16 @@ async function run() {
     const purchase = ceramicsShop.collection("purchase");
     //Review Collection
     const review = ceramicsShop.collection("review");
-    app.post("/addProducts", async (req, res) => {
-      console.log("add products hitted");
-    });
+   
 
     // add customer
     app.post("/addCustomer", async (req, res) => {
-      console.log("add user hitted");
       const newUser = req.body;
       const result = await customer.insertOne(newUser);
       res.send(result);
+       
     });
+
     //is Admin
     app.get("/customer/:email", async (req, res) => {
       const email = req.params.email;
@@ -64,14 +63,13 @@ async function run() {
       const updateDoc = { $set: { role: "admin" } };
       const result = await customer.updateOne(filter, updateDoc);
       res.json(result);
-      console.log(user);
+     
     });
 
     //ADD Products
     app.post("/addProduct", async (req, res) => {
       const newProduct = req.body;
       const result = await products.insertOne(newProduct);
-      console.log(result);
       res.send(result);
     });
     //ALL Products
@@ -90,7 +88,7 @@ async function run() {
     //Get single products data
     app.get("/product/:id", async (req, res) => {
       const service = req.params.id;
-      console.log(service);
+
       const query = { _id: ObjectId(service) };
       const result = await products.findOne(query);
       res.send(result);
@@ -101,16 +99,14 @@ async function run() {
       const newOrder = req.body;
       const result = await purchase.insertOne(newOrder);
       res.send(result);
-      console.log(result);
+     
     });
 
     //GET my Order
     app.get("/myOrder/:email", async (req, res) => {
       const myEmail = req.params.email;
-      console.log(myEmail);
       const query = { email: myEmail };
       const result = await purchase.find(query).toArray();
-      console.log(result);
       res.send(result);
     });
 
@@ -133,7 +129,7 @@ async function run() {
       const newReview = req.body;
       const result = await review.insertOne(newReview);
       res.send(result);
-      console.log(result);
+      
     });
     //GET All Review
     app.get("/allReview", async (req, res) => {
